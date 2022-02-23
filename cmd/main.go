@@ -6,7 +6,13 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
+	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbiface"
+	"github.com/emirtotic/go-serverless-example/pkg/handlers"
 	"os"
+)
+
+var (
+	dynaClient dynamodbiface.DynamoDBAPI
 )
 
 func main() {
@@ -18,12 +24,12 @@ func main() {
 	if err != nil {
 		return
 	}
-	dynaClient := dynamodb.New(awsSession)
+	dynaClient = dynamodb.New(awsSession)
 	lambda.Start(handler)
 
 }
 
-const tableName = "LambdaInGoUser"
+const tableName = "go-serverless-example"
 
 func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResponse, error) {
 
@@ -36,6 +42,7 @@ func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResp
 		return handlers.UpdateUser(request, tableName, dynaClient)
 	case "DELETE":
 		return handlers.DeleteUser(request, tableName, dynaClient)
+	default:
+		return handlers.UnhandledMethod()
 	}
-
 }
